@@ -3,7 +3,7 @@
   "description": "Feathers service with AWS DynamoDb",
   "version": "0.0.1",
   "homepage": "https://github.com/afifsohaili/feathers-dynamodb",
-  "main": "lib/",
+  "main": "build/main.js",
   "keywords": [
     "feathers",
     "feathers-plugin"
@@ -26,18 +26,21 @@
     "node": ">= 6.0.0"
   },
   "scripts": {
-    "publish": "git push origin --tags && npm run changelog && git push origin",
+    "publish": "git push origin --tags && npm run build && git push origin",
     "release:pre": "npm version prerelease && npm publish --tag pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
-    "lint": "xo"
+    "lint": "xo",
+    "dev": "backpack",
+    "build": "backpack build"
   },
   "directories": {
-    "lib": "lib"
+    "src": "src"
   },
   "dependencies": {},
   "devDependencies": {
+    "backpack-core": "^0.8.3",
     "xo": "^0.23.0"
   },
   "xo": {
