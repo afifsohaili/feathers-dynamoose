@@ -30,11 +30,17 @@
     "release:pre": "npm version prerelease && npm publish --tag pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
-    "release:major": "npm version major && npm publish"
+    "release:major": "npm version major && npm publish",
+    "lint": "xo"
   },
   "directories": {
     "lib": "lib"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "xo": "^0.23.0"
+  },
+  "xo": {
+    "space": true
+  }
 }
