@@ -1,9 +1,12 @@
 module.exports = {
-  webpack: (config) => {
+  webpack: config => {
     return {
       ...config,
       mode: 'development',
-      target: 'node'
+      output: {
+        ...config.output,
+        libraryTarget: 'commonjs2'
+      }
     };
   }
-}
+};
