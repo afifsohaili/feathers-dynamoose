@@ -1,7 +1,21 @@
 /* eslint-disable no-unused-vars */
+import dynamoose from 'dynamoose';
+
+const DEFAULT_DYNAMOOSE_OPTIONS = {
+  create: false,
+  update: false,
+  waitForActive: false,
+  streamOptions: {
+    enable: false
+  },
+  serverSideEncryption: false
+};
+
 class Service {
-  constructor(options) {
+  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS) {
     this.options = options || {};
+    const {modelName, schema} = options;
+    this.model = dynamoose.model(modelName, schema, dynamooseOptions);
   }
 
   async find(params) {
@@ -18,6 +32,10 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
+
+    const Model = this.model;
+
+    new Model(data).save();
 
     return data;
   }
