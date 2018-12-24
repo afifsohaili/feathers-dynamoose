@@ -16,22 +16,25 @@ npm install feathers-dynamodb --save
 
 ## Documentation
 
-TBD
-
-## Complete Example
-
-Here's an example of a Feathers server that uses `feathers-dynamodb`. 
-
 ```js
-const feathers = require('@feathersjs/feathers');
-const plugin = require('feathers-dynamodb');
+// app.js
+const feathersDynamoose = require('feathers-dynamoose');
 
-// Initialize the application
-const app = feathers();
-
-// Initialize the plugin
-app.configure(plugin());
+app.use('/users', feathersDynamoose(
+  options, // See below for full list of options
+  optionalDynamooseOptions // See https://dynamoosejs.com/api#dynamoosemodelname-schema-options
+));
 ```
+
+## Options
+
+Options is a JavaScript object with the following keys:
+
+| Key       | Description                                                                        | Required |
+|-----------|------------------------------------------------------------------------------------|----------|
+| modelName | The name of the model.                                                             | ✅|
+| schema    | The schema for the model. Refer to https://dynamoosejs.com/api#schema              | ✅|
+| localUrl  | If the key is present, will instantiate dynamoose with `dynamoose.local(localUrl)` | |
 
 ## License
 
