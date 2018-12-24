@@ -33,7 +33,8 @@
     "release:major": "npm version major && npm publish",
     "lint": "xo",
     "dev": "backpack",
-    "build": "backpack build"
+    "build": "backpack build",
+    "test": "jest"
   },
   "directories": {
     "src": "src"
@@ -42,10 +43,27 @@
     "dynamoose": "^1.3.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "backpack-core": "^0.8.3",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
     "xo": "^0.23.0"
   },
   "xo": {
     "space": true
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
+    ],
+    "globals": {
+      "__DEV__": true
+    }
   }
 }
