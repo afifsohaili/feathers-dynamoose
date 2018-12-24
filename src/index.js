@@ -14,12 +14,16 @@ const DEFAULT_DYNAMOOSE_OPTIONS = {
 class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS) {
     this.options = options || {};
+    if (options.localUrl) {
+      dynamoose.local(options.localUrl);
+    }
     const {modelName, schema} = options;
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
   }
 
   async find(params) {
-    return [];
+    const Model = this.model;
+    return Model.scan().exec();
   }
 
   async get(id, params) {
@@ -55,3 +59,4 @@ class Service {
 
 module.exports = options => new Service(options);
 module.exports.Service = Service;
+module.exports.DEFAULT_DYNAMOOSE_OPTIONS = DEFAULT_DYNAMOOSE_OPTIONS;
