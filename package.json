@@ -47,6 +47,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "backpack-core": "^0.8.3",
+    "dynamodb-local": "0.0.24",
     "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
     "xo": "^0.23.0"
