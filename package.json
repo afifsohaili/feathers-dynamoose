@@ -34,7 +34,7 @@
     "lint": "xo",
     "dev": "backpack",
     "build": "backpack build",
-    "test": "jest"
+    "test": "jest && codecov"
   },
   "directories": {
     "src": "src"
@@ -49,6 +49,7 @@
     "babel-jest": "^23.6.0",
     "backpack-core": "^0.8.3",
     "chance": "^1.0.18",
+    "codecov": "^3.1.0",
     "dynamodb-local": "0.0.24",
     "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
@@ -58,20 +59,22 @@
     "space": true
   },
   "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "./coverage/",
+    "globalSetup": "<rootDir>/tests/setup-dynamodb.js",
+    "globalTeardown": "<rootDir>/tests/teardown-dynamodb.js",
+    "globals": {
+      "__DEV__": true
+    },
+    "setupFiles": [
+      "<rootDir>/tests/set-dynamodb-config.js"
+    ],
     "testEnvironment": "node",
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     },
-    "globalSetup": "<rootDir>/tests/setup-dynamodb.js",
-    "globalTeardown": "<rootDir>/tests/teardown-dynamodb.js",
-    "setupFiles": [
-      "<rootDir>/tests/set-dynamodb-config.js"
-    ],
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
-    ],
-    "globals": {
-      "__DEV__": true
-    }
+    ]
   }
 }
