@@ -34,3 +34,4 @@ dist/
 .npmrc
 build/
 .idea/
+.stryker-tmp/
