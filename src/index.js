@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import dynamoose from 'dynamoose';
 import uuid from './uuid';
+import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 
 const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
@@ -13,8 +14,10 @@ const DEFAULT_DYNAMOOSE_OPTIONS = {
 };
 
 class Service {
-  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS) {
+  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, logger = defaultLogger) {
+    this.logger = logger;
     this.options = options || {};
+    this.paginate = options.paginate;
     if (options.localUrl) {
       dynamoose.local(options.localUrl);
     }
@@ -22,9 +25,18 @@ class Service {
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
   }
 
-  async find(params) {
-    const Model = this.model;
-    return Model.scan().exec();
+  async find(params = {}) {
+    const pagination = this.paginate;
+    if (!pagination || !pagination.max) {
+      this.logger.warn(NO_MAX_OPTION_WARNING);
+    }
+    const scanOperation = this.model.scan(params.query);
+    if (pagination && pagination.max) {
+      scanOperation.limit(pagination.max);
+    } else {
+      scanOperation.all();
+    }
+    return scanOperation.exec();
   }
 
   async get(id, params) {
@@ -53,6 +65,11 @@ class Service {
   }
 }
 
-module.exports = options => new Service(options);
+module.exports = (
+  options,
+  dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS,
+  logger = defaultLogger
+) => new Service(options, dynamooseOptions, logger);
+
 module.exports.Service = Service;
 module.exports.DEFAULT_DYNAMOOSE_OPTIONS = DEFAULT_DYNAMOOSE_OPTIONS;

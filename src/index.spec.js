@@ -1,16 +1,17 @@
 /* globals describe, it, expect */
 
-import {Service} from './index';
 import chance from '../tests/chance';
+// eslint-disable-next-line import/named
+import {Service} from '.';
 
-const schema = {id: {type: String, hashKey: true}, name: {type: String, hashKey: true}};
+const schema = {id: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
 const localUrl = 'http://localhost:8000';
 
-const createService = modelName => new Service({modelName, schema, localUrl}, {create: true, waitForActive: true});
+const createService = ({modelName, ...options}) => new Service({modelName, schema, localUrl, ...options}, {create: true, waitForActive: true});
 
 describe('create', () => {
-  it('create should save a record on dynamodb table', async () => {
-    const service = createService(chance.word({length: 200}));
+  it('should save a record on dynamodb table', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
     const name = chance.name();
     await service.create({name});
     const all = await service.find();
@@ -18,8 +19,8 @@ describe('create', () => {
     expect(all[0].name).toBe(name);
   });
 
-  it('create should assign a unique uuid to the table', async () => {
-    const service = createService(chance.word({length: 200}));
+  it('should assign a unique uuid to the table', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
     const name = chance.name();
     await service.create({name});
     const all = await service.find();
@@ -28,13 +29,53 @@ describe('create', () => {
     expect(all[0].id.length).toBeGreaterThan(0);
   });
 
-  it('create should return the created dynamodb record', async () => {
-    const service = createService(chance.word({length: 200}));
+  it('should return the created dynamodb record', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
     const name = chance.name();
     const result = await service.create({name});
     expect(result).toMatchObject({
       id: expect.any(String),
       name
     });
+  });
+});
+
+describe('find', () => {
+  it('should return matching items when given the right query', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
+    const control = chance.name();
+    const expected = chance.name();
+    await service.create([{name: control}, {name: expected}]);
+    const result = await service.find({query: {name: {contains: expected}}});
+    expect(result.length).toBe(1);
+    expect(result[0].name).toBe(expected);
+  });
+
+  it('should not return non-matching items', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
+    const control = 'control';
+    await service.create([{name: control}]);
+    const result = await service.find({query: {name: {eq: 'test'}}});
+    expect(result.length).toBe(0);
+  });
+
+  it('should return paginated result when options.paginate.max is present', async () => {
+    const paginate = {max: 2};
+    const service = createService({modelName: chance.word({length: 200}), paginate});
+    const keyword = chance.word();
+    const data = new Array(5).fill('').map(() => ({name: keyword + chance.word()}));
+    await service.create(data);
+    const result = await service.find({query: {name: {contains: keyword}}});
+    expect(result.length).toBe(2);
+  });
+
+  it('should return all results when options.paginate.max is absent', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
+    const recordsLength = 5;
+    const keyword = chance.word();
+    const data = new Array(recordsLength).fill('').map(() => ({name: keyword + chance.word()}));
+    await service.create(data);
+    const result = await service.find({query: {name: {contains: keyword}}});
+    expect(result.length).toBe(recordsLength);
   });
 });
