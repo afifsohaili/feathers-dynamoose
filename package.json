@@ -1,8 +1,8 @@
 {
-  "name": "feathers-dynamodb",
-  "description": "Feathers service with AWS DynamoDb",
+  "name": "feathers-dynamoose",
+  "description": "Feathers service with AWS DynamoDb via dynamoose",
   "version": "0.0.1",
-  "homepage": "https://github.com/afifsohaili/feathers-dynamodb",
+  "homepage": "https://github.com/afifsohaili/feathers-dynamoose",
   "main": "build/main.js",
   "keywords": [
     "feathers",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/afifsohaili/feathers-dynamodb.git"
+    "url": "git://github.com/afifsohaili/feathers-dynamoose.git"
   },
   "author": {
     "name": "Afif Sohaili",
@@ -20,7 +20,7 @@
   },
   "contributors": [],
   "bugs": {
-    "url": "https://github.com/afifsohaili/feathers-dynamodb/issues"
+    "url": "https://github.com/afifsohaili/feathers-dynamoose/issues"
   },
   "engines": {
     "node": ">= 6.0.0"

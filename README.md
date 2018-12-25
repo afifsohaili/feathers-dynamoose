@@ -1,17 +1,17 @@
-# feathers-dynamodb
+# feathers-dynamoose
 
-[![Build Status](https://travis-ci.org/afifsohaili/feathers-dynamodb.png?branch=master)](https://travis-ci.org/afifsohaili/feathers-dynamodb)
-[![Code Climate](https://codeclimate.com/github/afifsohaili/feathers-dynamodb/badges/gpa.svg)](https://codeclimate.com/github/afifsohaili/feathers-dynamodb)
-[![Test Coverage](https://codeclimate.com/github/afifsohaili/feathers-dynamodb/badges/coverage.svg)](https://codeclimate.com/github/afifsohaili/feathers-dynamodb/coverage)
-[![Dependency Status](https://img.shields.io/david/afifsohaili/feathers-dynamodb.svg?style=flat-square)](https://david-dm.org/afifsohaili/feathers-dynamodb)
-[![Download Status](https://img.shields.io/npm/dm/feathers-dynamodb.svg?style=flat-square)](https://www.npmjs.com/package/feathers-dynamodb)
+[![Build Status](https://travis-ci.org/afifsohaili/feathers-dynamoose.png?branch=master)](https://travis-ci.org/afifsohaili/feathers-dynamoose)
+[![Code Climate](https://codeclimate.com/github/afifsohaili/feathers-dynamoose/badges/gpa.svg)](https://codeclimate.com/github/afifsohaili/feathers-dynamoose)
+[![Test Coverage](https://codeclimate.com/github/afifsohaili/feathers-dynamoose/badges/coverage.svg)](https://codeclimate.com/github/afifsohaili/feathers-dynamoose/coverage)
+[![Dependency Status](https://img.shields.io/david/afifsohaili/feathers-dynamoose.svg?style=flat-square)](https://david-dm.org/afifsohaili/feathers-dynamoose)
+[![Download Status](https://img.shields.io/npm/dm/feathers-dynamoose.svg?style=flat-square)](https://www.npmjs.com/package/feathers-dynamoose)
 
-> Feathers service with AWS DynamoDb
+> Feathers service with AWS DynamoDb via [dynamoose](https://dynamoosejs.com/)
 
 ## Installation
 
 ```
-npm install feathers-dynamodb --save
+npm install feathers-dynamoose --save
 ```
 
 ## Documentation
