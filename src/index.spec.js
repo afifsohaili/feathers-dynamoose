@@ -54,7 +54,7 @@ describe('find', () => {
   it('should not return non-matching items', async () => {
     const service = createService({modelName: chance.word({length: 200})});
     const control = 'control';
-    await service.create([{name: control}]);
+    await service.create({name: control});
     const result = await service.find({query: {name: {eq: 'test'}}});
     expect(result.length).toBe(0);
   });
@@ -77,5 +77,26 @@ describe('find', () => {
     await service.create(data);
     const result = await service.find({query: {name: {contains: keyword}}});
     expect(result.length).toBe(recordsLength);
+  });
+});
+
+describe('get', () => {
+  it('should get the record when there is a record with the given value as hash key', async () => {
+    const hashKey = chance.word();
+    const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
+    const service = createService({modelName: chance.word({length: 200}), schema});
+    const keyword = chance.word();
+    const record = await service.create({name: keyword});
+    const expected = await service.get(record[hashKey]);
+    expect(expected.name).toBe(keyword);
+  });
+
+  it('should return undefined when there is no record with the given value as hash key', async () => {
+    const hashKey = chance.word();
+    const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
+    const service = createService({modelName: chance.word({length: 200}), schema});
+    await service.create({name: chance.word()});
+    const expected = await service.get('non-existent-id');
+    expect(expected).toBe(undefined);
   });
 });

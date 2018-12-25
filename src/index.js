@@ -15,13 +15,16 @@ const DEFAULT_DYNAMOOSE_OPTIONS = {
 
 class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, logger = defaultLogger) {
-    this.logger = logger;
     this.options = options || {};
-    this.paginate = options.paginate;
-    if (options.localUrl) {
-      dynamoose.local(options.localUrl);
+    this.logger = logger;
+    this.paginate = this.options.paginate;
+    if (this.options.localUrl) {
+      dynamoose.local(this.options.localUrl);
     }
-    const {modelName, schema} = options;
+    const {modelName, schema} = this.options;
+    this.hashKey = Object.keys(this.options.schema).filter(key => {
+      return this.options.schema[key].hashKey;
+    })[0];
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
   }
 
@@ -40,16 +43,14 @@ class Service {
   }
 
   async get(id, params) {
-    return {
-      id, text: `A new message with ID: ${id}!`
-    };
+    return this.model.queryOne({[this.hashKey]: {eq: id}}).exec();
   }
 
   async create(data, params) {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-    return this.model.create({id: uuid(), ...data});
+    return this.model.create({[this.hashKey]: uuid(), ...data});
   }
 
   async update(id, data, params) {
