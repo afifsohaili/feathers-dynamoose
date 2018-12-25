@@ -61,6 +61,11 @@
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     },
+    "globalSetup": "<rootDir>/tests/setup-dynamodb.js",
+    "globalTeardown": "<rootDir>/tests/teardown-dynamodb.js",
+    "setupFiles": [
+      "<rootDir>/tests/set-dynamodb-region.js"
+    ],
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
     ],

@@ -39,7 +39,7 @@ class Service {
 
     const Model = this.model;
 
-    new Model(data).save();
+    await new Model(data).save();
 
     return data;
   }
