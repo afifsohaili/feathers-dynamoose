@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import dynamoose from 'dynamoose';
+import uuid from './uuid';
 
 const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
@@ -36,12 +37,7 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-
-    const Model = this.model;
-
-    await new Model(data).save();
-
-    return data;
+    return this.model.create({id: uuid(), ...data});
   }
 
   async update(id, data, params) {
