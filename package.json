@@ -34,7 +34,7 @@
     "lint": "xo",
     "dev": "backpack",
     "build": "backpack build",
-    "test": "jest && codecov && stryker run"
+    "test": "jest && codecov && stryker run && rimraf .stryker-tmp "
   },
   "directories": {
     "src": "src"
@@ -53,6 +53,7 @@
     "dynamodb-local": "0.0.24",
     "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
+    "rimraf": "^2.6.2",
     "stryker": "^0.34.0",
     "stryker-api": "^0.23.0",
     "stryker-javascript-mutator": "^0.13.0",
