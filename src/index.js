@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import dynamoose from 'dynamoose';
-import uuid from './uuid';
 import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 
 const DEFAULT_DYNAMOOSE_OPTIONS = {
@@ -50,7 +49,7 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-    return this.model.create({[this.hashKey]: uuid(), ...data});
+    return this.model.create(data);
   }
 
   async update(id, data, params) {

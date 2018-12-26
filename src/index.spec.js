@@ -7,32 +7,28 @@ import {Service} from '.';
 const defaultSchema = {id: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
 const localUrl = 'http://localhost:8000';
 
-const createService = ({modelName, ...options}) => new Service({modelName, schema: defaultSchema, localUrl, ...options}, {create: true, waitForActive: true});
+const createService = ({modelName, ...options}) => new Service(
+  {modelName, schema: defaultSchema, localUrl, ...options},
+  {create: true, waitForActive: true}
+);
 
 describe('create', () => {
   it('should save a record on dynamodb table', async () => {
     const service = createService({modelName: chance.word({length: 200})});
+    const id = chance.guid();
     const name = chance.name();
-    await service.create({name});
+    await service.create({id, name});
     const all = await service.find();
     expect(all.length).toBe(1);
+    expect(all[0].id).toBe(id);
     expect(all[0].name).toBe(name);
-  });
-
-  it('should assign a unique uuid to the table', async () => {
-    const service = createService({modelName: chance.word({length: 200})});
-    const name = chance.name();
-    await service.create({name});
-    const all = await service.find();
-    expect(all.length).toBe(1);
-    expect(all[0].id).toEqual(expect.any(String));
-    expect(all[0].id.length).toBeGreaterThan(0);
   });
 
   it('should return the created dynamodb record', async () => {
     const service = createService({modelName: chance.word({length: 200})});
+    const id = chance.guid();
     const name = chance.name();
-    const result = await service.create({name});
+    const result = await service.create({id, name});
     expect(result).toMatchObject({
       id: expect.any(String),
       name
@@ -43,18 +39,18 @@ describe('create', () => {
 describe('find', () => {
   it('should return matching items when given the right query', async () => {
     const service = createService({modelName: chance.word({length: 200})});
-    const control = chance.name();
-    const expected = chance.name();
-    await service.create([{name: control}, {name: expected}]);
-    const result = await service.find({query: {name: {contains: expected}}});
+    const control = {id: chance.guid(), name: chance.name()};
+    const expected = {id: chance.guid(), name: chance.name()};
+    await service.create([control, expected]);
+    const result = await service.find({query: {name: {contains: expected.name}}});
     expect(result.length).toBe(1);
-    expect(result[0].name).toBe(expected);
+    expect(result[0]).toMatchObject(expected);
   });
 
   it('should not return non-matching items', async () => {
     const service = createService({modelName: chance.word({length: 200})});
-    const control = 'control';
-    await service.create({name: control});
+    const control = {name: 'control', id: chance.guid()};
+    await service.create(control);
     const result = await service.find({query: {name: {eq: 'test'}}});
     expect(result.length).toBe(0);
   });
@@ -63,7 +59,7 @@ describe('find', () => {
     const paginate = {max: 2};
     const service = createService({modelName: chance.word({length: 200}), paginate});
     const keyword = chance.word();
-    const data = new Array(5).fill('').map(() => ({name: keyword + chance.word()}));
+    const data = new Array(5).fill('').map(() => ({id: chance.guid(), name: keyword + chance.word()}));
     await service.create(data);
     const result = await service.find({query: {name: {contains: keyword}}});
     expect(result.length).toBe(2);
@@ -73,7 +69,7 @@ describe('find', () => {
     const service = createService({modelName: chance.word({length: 200})});
     const recordsLength = 5;
     const keyword = chance.word();
-    const data = new Array(recordsLength).fill('').map(() => ({name: keyword + chance.word()}));
+    const data = new Array(recordsLength).fill('').map(() => ({id: chance.guid(), name: keyword + chance.word()}));
     await service.create(data);
     const result = await service.find({query: {name: {contains: keyword}}});
     expect(result.length).toBe(recordsLength);
@@ -86,7 +82,7 @@ describe('get', () => {
     const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
     const service = createService({modelName: chance.word({length: 200}), schema});
     const keyword = chance.word();
-    const record = await service.create({name: keyword});
+    const record = await service.create({[hashKey]: chance.guid(), name: keyword});
     const expected = await service.get(record[hashKey]);
     expect(expected.name).toBe(keyword);
   });
@@ -95,7 +91,7 @@ describe('get', () => {
     const hashKey = chance.word();
     const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
     const service = createService({modelName: chance.word({length: 200}), schema});
-    await service.create({name: chance.word()});
+    await service.create({[hashKey]: chance.guid(), name: chance.word()});
     const expected = await service.get('non-existent-id');
     expect(expected).toBe(undefined);
   });
@@ -106,7 +102,9 @@ describe('update', () => {
     const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
     const service = createService({modelName: chance.word({length: 200}), schema});
     const originalName = 'Original Name';
-    const record = await service.create({name: originalName, age: chance.natural({max: 10}), address: chance.address()});
+    const record = await service.create({
+      id: chance.guid(), name: originalName, age: chance.natural({max: 10}), address: chance.address()
+    });
     const newAddress = chance.address();
     await service.update({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
     const newRecord = await service.get(record.id);
@@ -121,7 +119,7 @@ describe('patch', () => {
     const service = createService({modelName: chance.word({length: 200}), schema});
     const originalName = 'Original Name';
     const age = chance.natural({max: 10});
-    const record = await service.create({name: originalName, age, address: chance.address()});
+    const record = await service.create({id: chance.guid(), name: originalName, age, address: chance.address()});
     const newAddress = chance.address();
     await service.patch({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
     const newRecord = await service.get(record.id);
@@ -134,7 +132,7 @@ describe('remove', () => {
   it('should remove the resource identified by the given id', async () => {
     const service = createService({modelName: chance.word({length: 200})});
     const name = chance.name();
-    const newRecord = await service.create({name});
+    const newRecord = await service.create({id: chance.guid(), name});
     await service.remove({id: newRecord.id, name});
     const allRecords = await service.find();
     expect(allRecords.length).toBe(0);
