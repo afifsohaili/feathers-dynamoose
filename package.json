@@ -8,7 +8,7 @@
     "dev": "lerna run dev --stream",
     "lint": "lerna run lint --stream",
     "postinstall": "lerna bootstrap",
-    "publish": "lerna run prepublish --stream && lerna publish",
+    "publish": "lerna publish",
     "test": "lerna run test --stream"
   },
   "repository": {

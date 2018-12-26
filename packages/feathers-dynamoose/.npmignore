@@ -8,3 +8,7 @@
 test/
 coverage/
 .github/
+backpack.config.js
+stryker.conf.js
+src/
+tests/
