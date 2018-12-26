@@ -36,6 +36,27 @@ Options is a JavaScript object with the following keys:
 | schema    | The schema for the model. Refer to https://dynamoosejs.com/api#schema              | ✅|
 | localUrl  | If the key is present, will instantiate dynamoose with `dynamoose.local(localUrl)` | |
 
+## Examples
+
+```js
+// src/users/schema.js
+module.exports = {
+  postId: {type: String, hashKey: true},
+  blogId: {type: String, rangeKey: true},
+};
+
+// src/app.js
+const uuid = require('uuid/v4');
+const feathersDynamoose = require('feathers-dynamoose');
+const postsSchema = require('users/schema');
+
+app.use('/v1/posts', feathersDynamoose({modelName: 'posts', schema: postsSchema}));
+// create a new record
+const record = await app.service('v1/posts').create({postId: uuid(), blogId: uuid()});
+// delete a record. id accepts an object.
+await app.service('v1/posts').delete({postId: record.postId, blogId: record.blogId});
+```
+
 ## License
 
 Copyright (c) 2018
