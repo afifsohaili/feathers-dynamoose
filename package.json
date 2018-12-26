@@ -1,0 +1,23 @@
+{
+  "name": "feathers-dynamoose-repo",
+  "version": "0.0.1",
+  "description": "Feathers service for DynamoDB with dynamoose",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "lerna bootstrap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/afifsohaili/feathers-dynamoose.git"
+  },
+  "keywords": [],
+  "author": "Afif Sohaili",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/afifsohaili/feathers-dynamoose/issues"
+  },
+  "homepage": "https://github.com/afifsohaili/feathers-dynamoose#readme",
+  "devDependencies": {
+    "lerna": "^3.8.0"
+  }
+}
