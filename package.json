@@ -4,7 +4,12 @@
   "description": "Feathers service for DynamoDB with dynamoose",
   "main": "index.js",
   "scripts": {
-    "postinstall": "lerna bootstrap"
+    "build": "lerna run build --stream",
+    "dev": "lerna run dev --stream",
+    "lint": "lerna run lint --stream",
+    "postinstall": "lerna bootstrap",
+    "publish": "lerna publish",
+    "test": "lerna run test --stream"
   },
   "repository": {
     "type": "git",
