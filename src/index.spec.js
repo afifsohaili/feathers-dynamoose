@@ -4,10 +4,10 @@ import chance from '../tests/chance';
 // eslint-disable-next-line import/named
 import {Service} from '.';
 
-const schema = {id: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
+const defaultSchema = {id: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
 const localUrl = 'http://localhost:8000';
 
-const createService = ({modelName, ...options}) => new Service({modelName, schema, localUrl, ...options}, {create: true, waitForActive: true});
+const createService = ({modelName, ...options}) => new Service({modelName, schema: defaultSchema, localUrl, ...options}, {create: true, waitForActive: true});
 
 describe('create', () => {
   it('should save a record on dynamodb table', async () => {
@@ -98,5 +98,45 @@ describe('get', () => {
     await service.create({name: chance.word()});
     const expected = await service.get('non-existent-id');
     expect(expected).toBe(undefined);
+  });
+});
+
+describe('update', () => {
+  it('should replace the resource identified by the given id with the new data', async () => {
+    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+    const service = createService({modelName: chance.word({length: 200}), schema});
+    const originalName = 'Original Name';
+    const record = await service.create({name: originalName, age: chance.natural({max: 10}), address: chance.address()});
+    const newAddress = chance.address();
+    await service.update({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    const newRecord = await service.get(record.id);
+    expect(newRecord.age).toBe(undefined);
+    expect(newRecord.address).toBe(newAddress);
+  });
+});
+
+describe('patch', () => {
+  it('should update the resource identified by the given id with the new data', async () => {
+    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+    const service = createService({modelName: chance.word({length: 200}), schema});
+    const originalName = 'Original Name';
+    const age = chance.natural({max: 10});
+    const record = await service.create({name: originalName, age, address: chance.address()});
+    const newAddress = chance.address();
+    await service.patch({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    const newRecord = await service.get(record.id);
+    expect(newRecord.age).toBe(age);
+    expect(newRecord.address).toBe(newAddress);
+  });
+});
+
+describe('remove', () => {
+  it('should remove the resource identified by the given id', async () => {
+    const service = createService({modelName: chance.word({length: 200})});
+    const name = chance.name();
+    const newRecord = await service.create({name});
+    await service.remove({id: newRecord.id, name});
+    const allRecords = await service.find();
+    expect(allRecords.length).toBe(0);
   });
 });

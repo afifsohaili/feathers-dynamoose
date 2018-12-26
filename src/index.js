@@ -54,15 +54,17 @@ class Service {
   }
 
   async update(id, data, params) {
-    return data;
+    await this.model.delete(id);
+    await this.model.create(id);
+    await this.model.update(id, data);
   }
 
   async patch(id, data, params) {
-    return data;
+    await this.model.update(id, data);
   }
 
   async remove(id, params) {
-    return {id};
+    await this.model.delete(id);
   }
 }
 
