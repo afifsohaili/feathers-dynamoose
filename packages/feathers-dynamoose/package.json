@@ -26,10 +26,11 @@
     "node": ">= 6.0.0"
   },
   "scripts": {
-    "lint": "xo",
-    "dev": "backpack",
     "build": "backpack build",
-    "test": "jest && codecov && stryker run && rimraf .stryker-tmp "
+    "dev": "backpack",
+    "lint": "xo",
+    "prepublish": "npm run build",
+    "test": "jest && codecov && stryker run && rimraf .stryker-tmp"
   },
   "directories": {
     "src": "src"
