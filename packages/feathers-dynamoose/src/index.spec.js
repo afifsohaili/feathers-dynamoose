@@ -174,8 +174,8 @@ describe('remove', () => {
   });
 });
 
-describe('passing dynamoose.Schema object for schema', () => {
-  it('should still obtain the hashkey', () => {
+describe('passing dynamoose.Schema object for schema', async () => {
+  it('should still obtain the hashkey', async () => {
     const hashKey = 'somecoolstring';
     const schema = new Schema({
       [hashKey]: {type: String, hashKey: true},
@@ -185,7 +185,7 @@ describe('passing dynamoose.Schema object for schema', () => {
     });
     const service = new Service(
       {modelName: randomModelName(), schema, localUrl},
-      {create: true, waitForActive: true}
+      {create: false}
     );
     expect(service.hashKey).toEqual(hashKey);
   });
