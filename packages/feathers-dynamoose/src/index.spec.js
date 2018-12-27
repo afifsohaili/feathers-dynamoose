@@ -113,6 +113,19 @@ describe('update', () => {
     expect(newRecord.age).toBe(undefined);
     expect(newRecord.address).toBe(newAddress);
   });
+
+  it('should return the updated record', async () => {
+    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+    const service = createService({modelName: randomModelName(), schema});
+    const originalName = 'Original Name';
+    const record = await service.create({
+      id: chance.guid(), name: originalName, age: chance.natural({max: 10}), address: chance.address()
+    });
+    const newAddress = chance.address();
+    const updatedRecord = await service.update({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    expect(updatedRecord.age).toBe(undefined);
+    expect(updatedRecord.address).toBe(newAddress);
+  });
 });
 
 describe('patch', () => {
@@ -128,6 +141,18 @@ describe('patch', () => {
     expect(newRecord.age).toBe(age);
     expect(newRecord.address).toBe(newAddress);
   });
+
+  it('should return the updated record', async () => {
+    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+    const service = createService({modelName: randomModelName(), schema});
+    const originalName = 'Original Name';
+    const age = chance.natural({max: 10});
+    const record = await service.create({id: chance.guid(), name: originalName, age, address: chance.address()});
+    const newAddress = chance.address();
+    const updatedRecord = await service.patch({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    expect(updatedRecord.age).toBe(age);
+    expect(updatedRecord.address).toBe(newAddress);
+  });
 });
 
 describe('remove', () => {
@@ -138,6 +163,14 @@ describe('remove', () => {
     await service.remove({id: newRecord.id, name});
     const allRecords = await service.find();
     expect(allRecords.length).toBe(0);
+  });
+
+  it('should return the removed record', async () => {
+    const service = createService({modelName: randomModelName()});
+    const name = chance.name();
+    const newRecord = await service.create({id: chance.guid(), name});
+    const deletedRecord = await service.remove({id: newRecord.id, name});
+    expect(deletedRecord.name).toBe(name);
   });
 });
 
