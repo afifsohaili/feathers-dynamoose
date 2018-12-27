@@ -41,7 +41,12 @@ export class Service {
       scanOperation.all();
     }
     const result = await scanOperation.exec();
-    return JSON.parse(JSON.stringify(result));
+    return {
+      scannedCount: result.scannedCount,
+      count: result.count,
+      timesScanned: result.timesScanned,
+      data: jsonify(result)
+    };
   }
 
   async get(id, params) {
