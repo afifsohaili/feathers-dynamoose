@@ -2,7 +2,7 @@
 import dynamoose from 'dynamoose';
 import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 
-const DEFAULT_DYNAMOOSE_OPTIONS = {
+export const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
   update: false,
   waitForActive: false,
@@ -11,8 +11,10 @@ const DEFAULT_DYNAMOOSE_OPTIONS = {
   },
   serverSideEncryption: false
 };
+export const {Schema} = dynamoose;
+const jsonify = model => JSON.parse(JSON.stringify(model));
 
-class Service {
+export class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, logger = defaultLogger) {
     this.options = options || {};
     this.logger = logger;
@@ -21,9 +23,9 @@ class Service {
       dynamoose.local(this.options.localUrl);
     }
     const {modelName, schema} = this.options;
-    this.hashKey = Object.keys(this.options.schema).filter(key => {
-      return this.options.schema[key].hashKey;
-    })[0];
+    this.hashKey = schema && schema.hashKey ?
+      schema.hashKey.name :
+      Object.keys(schema).filter(key => schema[key].hashKey)[0];
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
   }
 
@@ -38,7 +40,8 @@ class Service {
     } else {
       scanOperation.all();
     }
-    return scanOperation.exec();
+    const result = await scanOperation.exec();
+    return JSON.parse(JSON.stringify(result));
   }
 
   async get(id, params) {
@@ -49,29 +52,30 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-    return this.model.create(data);
+    const record = await this.model.create(data);
+    return jsonify(record);
   }
 
   async update(id, data, params) {
     await this.model.delete(id);
     await this.model.create(id);
-    await this.model.update(id, data);
+    const result = await this.model.update(id, data);
+    return jsonify(result);
   }
 
   async patch(id, data, params) {
-    await this.model.update(id, data);
+    const result = await this.model.update(id, data);
+    return jsonify(result);
   }
 
   async remove(id, params) {
-    await this.model.delete(id);
+    const result = await this.model.delete(id);
+    return jsonify(result);
   }
 }
 
-module.exports = (
+export default (
   options,
   dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS,
   logger = defaultLogger
 ) => new Service(options, dynamooseOptions, logger);
-
-module.exports.Service = Service;
-module.exports.DEFAULT_DYNAMOOSE_OPTIONS = DEFAULT_DYNAMOOSE_OPTIONS;
