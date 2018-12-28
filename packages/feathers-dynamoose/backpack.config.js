@@ -1,12 +1,10 @@
+const isProd = Boolean(process.env.PRODUCTION_MODE);
+
 module.exports = {
   webpack: config => {
     return {
       ...config,
-      mode: 'development',
-      output: {
-        ...config.output,
-        libraryTarget: 'commonjs2'
-      }
+      mode: isProd ? 'production' : 'development'
     };
   }
 };
