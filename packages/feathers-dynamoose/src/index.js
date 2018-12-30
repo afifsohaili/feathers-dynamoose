@@ -30,13 +30,16 @@ export class Service {
     this.id = this.hashKey;
   }
 
-  async find(params = {}) {
+  async find(params = {query: {}}) {
     const pagination = this.paginate;
     if (!pagination || !pagination.max) {
       this.logger.warn(NO_MAX_OPTION_WARNING);
     }
-    const scanOperation = this.model.scan(params.query);
-    if (pagination && pagination.max) {
+    const {$limit, ...filters} = params.query;
+    const scanOperation = this.model.scan(filters);
+    if ($limit) {
+      scanOperation.limit($limit);
+    } else if (pagination && pagination.max) {
       scanOperation.limit(pagination.max);
     } else {
       scanOperation.all();

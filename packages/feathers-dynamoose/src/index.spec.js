@@ -48,6 +48,24 @@ describe('find', () => {
     expect(result.data[0]).toMatchObject(expected);
   });
 
+  it('should return limited items when given the right query limited to the $limit param', async () => {
+    const service = createService({modelName: randomModelName()});
+    const keyword = chance.word();
+    const randomRecord = () => ({id: chance.guid(), name: keyword + chance.name()});
+    await service.create([randomRecord(), randomRecord(), randomRecord()]);
+    const result = await service.find({query: {name: {contains: keyword}, $limit: 1}});
+    expect(result.data.length).toBe(1);
+  });
+
+  it('should compare values using eq should params.query does not provide valid dynamodb matchers', async () => {
+    const service = createService({modelName: randomModelName()});
+    const expected = {id: chance.guid(), name: chance.name()};
+    const control = {id: chance.guid(), name: expected.name + chance.name()};
+    await service.create([expected, control]);
+    const result = await service.find({query: {name: expected.name}});
+    expect(result.data.length).toBe(1);
+  });
+
   it('should not return non-matching items', async () => {
     const service = createService({modelName: randomModelName()});
     const control = {name: 'control', id: chance.guid()};
