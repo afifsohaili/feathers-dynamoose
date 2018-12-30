@@ -27,6 +27,7 @@ export class Service {
       schema.hashKey.name :
       Object.keys(schema).filter(key => schema[key].hashKey)[0];
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
+    this.id = this.hashKey;
   }
 
   async find(params = {}) {

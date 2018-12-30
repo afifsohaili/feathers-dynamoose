@@ -202,3 +202,20 @@ describe('passing dynamoose.Schema object for schema', async () => {
     expect(service.hashKey).toEqual(hashKey);
   });
 });
+
+describe('set service.id for authentication', async () => {
+  it('should set the hashkey key as id', async () => {
+    const hashKey = 'somecoolstring';
+    const schema = new Schema({
+      [hashKey]: {type: String, hashKey: true},
+      name: {type: String, rangeKey: true}
+    }, {
+      timestamps: true
+    });
+    const service = new Service(
+      {modelName: randomModelName(), schema, localUrl},
+      {create: false}
+    );
+    expect(service.id).toEqual(hashKey);
+  });
+});
