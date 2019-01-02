@@ -1,6 +1,7 @@
 /* globals describe, it, expect */
 
 import chance from '../tests/chance';
+import {spy, stub} from 'sinon';
 // eslint-disable-next-line import/named
 import {Service, Schema} from '.';
 
@@ -12,6 +13,16 @@ const createService = ({modelName, ...options}) => new Service(
   {modelName, schema: defaultSchema, localUrl, ...options},
   {create: true, waitForActive: true}
 );
+
+const passArgsToSpy = spy => args => {
+  spy(args);
+  return spy;
+};
+const modelStub = spy => ({
+  limit: passArgsToSpy(spy),
+  all: passArgsToSpy(spy),
+  exec: () => ({scannedCount: 0, count: 0, timesScanned: 0, data: []})
+});
 
 describe('create', () => {
   it('should save a record on dynamodb table', async () => {
@@ -105,6 +116,50 @@ describe('find', () => {
     expect(result.scannedCount).toBe(recordsLength);
     expect(result.count).toBe(recordsLength);
     expect(result.timesScanned).toBe(1); // 1 because the sample size is small.
+  });
+
+  it('should use query instead of scan when hashkey exists in params.query', async () => {
+    const createService = ({modelName, ...options}, spy) => new Service(
+      {modelName, schema: defaultSchema, localUrl, ...options},
+      {create: true, waitForActive: true},
+      spy
+    );
+
+    const scanSpy = spy();
+    const querySpy = spy();
+    const dynamooseStub = {
+      local: spy(),
+      model: () => ({
+        scan: () => modelStub(scanSpy),
+        query: () => modelStub(querySpy)
+      })
+    };
+    const service = createService({modelName: randomModelName()}, dynamooseStub);
+    await service.find({query: {id: {eq: chance.string()}}});
+    expect(scanSpy.called).toBe(false);
+    expect(querySpy.called).toBe(true);
+  });
+
+  it('should use scan instead of query when hashkey does not exist in params.query', async () => {
+    const createService = ({modelName, ...options}, spy) => new Service(
+      {modelName, schema: defaultSchema, localUrl, ...options},
+      {create: true, waitForActive: true},
+      spy
+    );
+
+    const scanSpy = spy();
+    const querySpy = spy();
+    const dynamooseStub = {
+      local: spy(),
+      model: () => ({
+        scan: () => modelStub(scanSpy),
+        query: () => modelStub(querySpy)
+      })
+    };
+    const service = createService({modelName: randomModelName()}, dynamooseStub);
+    await service.find({query: {name: {eq: chance.string()}}});
+    expect(scanSpy.called).toBe(true);
+    expect(querySpy.called).toBe(false);
   });
 });
 

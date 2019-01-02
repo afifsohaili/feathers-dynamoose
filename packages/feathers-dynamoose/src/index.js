@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import dynamoose from 'dynamoose';
+import dynamooseModel from 'dynamoose';
 import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 
 export const DEFAULT_DYNAMOOSE_OPTIONS = {
@@ -11,11 +11,11 @@ export const DEFAULT_DYNAMOOSE_OPTIONS = {
   },
   serverSideEncryption: false
 };
-export const {Schema} = dynamoose;
+export const {Schema} = dynamooseModel;
 const jsonify = model => JSON.parse(JSON.stringify(model));
 
 export class Service {
-  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, logger = defaultLogger) {
+  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModel, logger = defaultLogger) {
     this.options = options || {};
     this.logger = logger;
     this.paginate = this.options.paginate;
@@ -36,6 +36,24 @@ export class Service {
       this.logger.warn(NO_MAX_OPTION_WARNING);
     }
     const {$limit, ...filters} = params.query;
+    if ((filters[this.hashKey] && filters[this.hashKey].eq) || typeof filters[this.hashKey] === 'string') {
+      const queryOperation = this.model.query(filters);
+      if ($limit) {
+        queryOperation.limit($limit);
+      } else if (pagination && pagination.max) {
+        queryOperation.limit(pagination.max);
+      } else {
+        queryOperation.all();
+      }
+
+      const result = await queryOperation.exec();
+      return {
+        scannedCount: result.scannedCount,
+        count: result.count,
+        timesScanned: result.timesScanned,
+        data: jsonify(result)
+      };
+    }
     const scanOperation = this.model.scan(filters);
     if ($limit) {
       scanOperation.limit($limit);
@@ -44,6 +62,7 @@ export class Service {
     } else {
       scanOperation.all();
     }
+
     const result = await scanOperation.exec();
     return {
       scannedCount: result.scannedCount,
