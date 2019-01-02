@@ -105,5 +105,6 @@ export class Service {
 export default (
   options,
   dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS,
+  dynamoose = dynamooseModel,
   logger = defaultLogger
 ) => new Service(options, dynamooseOptions, logger);
