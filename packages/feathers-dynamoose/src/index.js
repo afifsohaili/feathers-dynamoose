@@ -30,11 +30,11 @@ export class Service {
       dynamoose.local(this.options.localUrl);
     }
     const {modelName, schema} = this.options;
-    this.hashKey = schema && schema.hashKey ?
+    this.hashKey = schema instanceof dynamoose.Schema && schema.hashKey ?
       schema.hashKey.name :
       Object.keys(schema).filter(key => schema[key].hashKey)[0];
-    this.rangeKey = schema && schema.rangeKey ?
-      schema.rangeKey.name :
+    this.rangeKey = schema instanceof dynamoose.Schema ?
+      schema.rangeKey && schema.rangeKey.name :
       Object.keys(schema).filter(key => schema[key].rangeKey)[0];
     this.indexKeys = getIndexKeys(schema);
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);

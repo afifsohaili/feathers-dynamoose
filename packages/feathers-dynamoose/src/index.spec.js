@@ -1,7 +1,7 @@
 /* globals describe, it, expect */
 
 import chance from '../tests/chance';
-import {spy, stub} from 'sinon';
+import {spy} from 'sinon';
 // eslint-disable-next-line import/named
 import {Service, Schema} from '.';
 
@@ -18,6 +18,7 @@ const passArgsToSpy = spy => args => {
   spy(args);
   return spy;
 };
+
 const modelStub = spy => ({
   limit: passArgsToSpy(spy),
   all: passArgsToSpy(spy),
@@ -132,7 +133,8 @@ describe('find', () => {
       model: () => ({
         scan: () => modelStub(scanSpy),
         query: () => modelStub(querySpy)
-      })
+      }),
+      Schema
     };
     const service = createService({modelName: randomModelName()}, dynamooseStub);
     await service.find({query: {id: {eq: chance.string()}}});
@@ -154,7 +156,8 @@ describe('find', () => {
       model: () => ({
         scan: () => modelStub(scanSpy),
         query: () => modelStub(querySpy)
-      })
+      }),
+      Schema
     };
     const service = createService({modelName: randomModelName()}, dynamooseStub);
     await service.find({query: {name: {eq: chance.string()}}});
@@ -188,7 +191,8 @@ describe('find', () => {
       model: () => ({
         scan: () => modelStub(scanSpy),
         query: () => modelStub(querySpy)
-      })
+      }),
+      Schema
     };
     const service = createService({modelName: randomModelName()}, dynamooseStub);
     await service.find({query: {gender: {eq: chance.string()}}});
@@ -222,7 +226,8 @@ describe('find', () => {
       model: () => ({
         scan: () => modelStub(scanSpy),
         query: () => modelStub(querySpy)
-      })
+      }),
+      Schema
     };
     const service = createService({modelName: randomModelName()}, dynamooseStub);
     await service.find({query: {birthdate: {eq: chance.string()}}});
@@ -391,6 +396,20 @@ describe('track keys for query', async () => {
         {create: false}
       );
       expect(service.rangeKey).toEqual(rangeKey);
+    });
+
+    it('should have rangeKey equals undefined if there is no rangeKey supplied', async () => {
+      const schema = new Schema({
+        id: {type: String, hashKey: true},
+        name: {type: String}
+      }, {
+        timestamps: true
+      });
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.rangeKey).toEqual(undefined);
     });
 
     it('should track the indexes', async () => {
