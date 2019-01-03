@@ -292,3 +292,127 @@ describe('set service.id for authentication', async () => {
     expect(service.id).toEqual(hashKey);
   });
 });
+
+describe('track keys for query', async () => {
+  describe('given a Dynamoose.Schema object as schema', () => {
+    it('should track the hashKey', async () => {
+      const hashKey = 'somecoolstring';
+      const schema = new Schema({
+        [hashKey]: {type: String, hashKey: true},
+        name: {type: String, rangeKey: true}
+      }, {
+        timestamps: true
+      });
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.hashKey).toEqual(hashKey);
+    });
+
+    it('should track the rangeKey', async () => {
+      const rangeKey = 'somecoolstring';
+      const schema = new Schema({
+        id: {type: String, hashKey: true},
+        [rangeKey]: {type: String, rangeKey: true}
+      }, {
+        timestamps: true
+      });
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.rangeKey).toEqual(rangeKey);
+    });
+
+    it('should track the indexes', async () => {
+      const indexHashKey = 'somekey';
+      const indexHashKey2 = 'justanotherkey';
+      const schema = new Schema({
+        id: {type: String, hashKey: true},
+        name: {type: String, rangeKey: true},
+        [indexHashKey]: {
+          type: String,
+          index: {
+            global: true,
+            name: indexHashKey + 'Index',
+            project: ['name']
+          }
+        },
+        [indexHashKey2]: {
+          type: String,
+          index: {
+            global: true,
+            name: indexHashKey2 + 'Index',
+            project: ['name']
+          }
+        }
+      }, {
+        timestamps: true
+      });
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.indexKeys).toEqual([indexHashKey, indexHashKey2]);
+    });
+  });
+
+  describe('given an object as schema', () => {
+    it('should track the hashKey', async () => {
+      const hashKey = 'somecoolstring';
+      const schema = {
+        [hashKey]: {type: String, hashKey: true},
+        name: {type: String, rangeKey: true}
+      };
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.hashKey).toEqual(hashKey);
+    });
+
+    it('should track the rangeKey', async () => {
+      const rangeKey = 'somecoolstring';
+      const schema = {
+        id: {type: String, hashKey: true},
+        [rangeKey]: {type: String, rangeKey: true}
+      };
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.rangeKey).toEqual(rangeKey);
+    });
+
+    it('should track the indexes', async () => {
+      const indexHashKey = 'somekey';
+      const indexHashKey2 = 'justanotherkey';
+      const schema = {
+        id: {type: String, hashKey: true},
+        name: {type: String, rangeKey: true},
+        [indexHashKey]: {
+          type: String,
+          index: {
+            global: true,
+            name: indexHashKey + 'Index',
+            project: ['name']
+          }
+        },
+        [indexHashKey2]: {
+          type: String,
+          index: {
+            global: true,
+            name: indexHashKey2 + 'Index',
+            project: ['name']
+          }
+        }
+      };
+      const service = new Service(
+        {modelName: randomModelName(), schema, localUrl},
+        {create: false}
+      );
+      expect(service.indexKeys).toEqual([indexHashKey, indexHashKey2]);
+    });
+  });
+});

@@ -13,6 +13,12 @@ export const DEFAULT_DYNAMOOSE_OPTIONS = {
 };
 export const {Schema} = dynamooseModel;
 const jsonify = model => JSON.parse(JSON.stringify(model));
+const getIndexKeys = schema => {
+  if (schema && schema.indexes) {
+    return Object.values(schema.indexes.global).map(index => index.name);
+  }
+  return Object.keys(schema).filter(key => schema[key].index && schema[key].index.global);
+};
 
 export class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModel, logger = defaultLogger) {
@@ -26,6 +32,10 @@ export class Service {
     this.hashKey = schema && schema.hashKey ?
       schema.hashKey.name :
       Object.keys(schema).filter(key => schema[key].hashKey)[0];
+    this.rangeKey = schema && schema.rangeKey ?
+      schema.rangeKey.name :
+      Object.keys(schema).filter(key => schema[key].rangeKey)[0];
+    this.indexKeys = getIndexKeys(schema);
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
     this.id = this.hashKey;
   }
