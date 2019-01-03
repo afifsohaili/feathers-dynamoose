@@ -161,6 +161,74 @@ describe('find', () => {
     expect(scanSpy.called).toBe(true);
     expect(querySpy.called).toBe(false);
   });
+
+  it('should use query instead of scan when index hashkey exists in params.query', async () => {
+    const additionalFields = {
+      gender: {
+        type: String,
+        index: {
+          global: true,
+          name: 'GenderIndex',
+          project: ['birthdate']
+        }
+      },
+      birthdate: {type: String}
+    };
+    const schema = {...defaultSchema, ...additionalFields};
+    const createService = ({modelName, ...options}, spy) => new Service(
+      {modelName, schema, localUrl, ...options},
+      {create: true, waitForActive: true},
+      spy
+    );
+
+    const scanSpy = spy();
+    const querySpy = spy();
+    const dynamooseStub = {
+      local: spy(),
+      model: () => ({
+        scan: () => modelStub(scanSpy),
+        query: () => modelStub(querySpy)
+      })
+    };
+    const service = createService({modelName: randomModelName()}, dynamooseStub);
+    await service.find({query: {gender: {eq: chance.string()}}});
+    expect(scanSpy.called).toBe(false);
+    expect(querySpy.called).toBe(true);
+  });
+
+  it('should use scan instead of query when index hashkey does not exist in params.query', async () => {
+    const additionalFields = {
+      gender: {
+        type: String,
+        index: {
+          global: true,
+          name: 'GenderIndex',
+          project: ['birthdate']
+        }
+      },
+      birthdate: {type: String}
+    };
+    const schema = {...defaultSchema, ...additionalFields};
+    const createService = ({modelName, ...options}, spy) => new Service(
+      {modelName, schema, localUrl, ...options},
+      {create: true, waitForActive: true},
+      spy
+    );
+
+    const scanSpy = spy();
+    const querySpy = spy();
+    const dynamooseStub = {
+      local: spy(),
+      model: () => ({
+        scan: () => modelStub(scanSpy),
+        query: () => modelStub(querySpy)
+      })
+    };
+    const service = createService({modelName: randomModelName()}, dynamooseStub);
+    await service.find({query: {birthdate: {eq: chance.string()}}});
+    expect(scanSpy.called).toBe(true);
+    expect(querySpy.called).toBe(false);
+  });
 });
 
 describe('get', () => {

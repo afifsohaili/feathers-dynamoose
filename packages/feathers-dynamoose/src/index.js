@@ -17,7 +17,8 @@ const getIndexKeys = schema => {
   if (schema && schema.indexes) {
     return Object.values(schema.indexes.global).map(index => index.name);
   }
-  return Object.keys(schema).filter(key => schema[key].index && schema[key].index.global);
+  const indexKeys = Object.keys(schema).filter(key => schema[key].index && schema[key].index.global);
+  return Array.isArray(indexKeys) ? indexKeys : [];
 };
 
 export class Service {
@@ -46,7 +47,13 @@ export class Service {
       this.logger.warn(NO_MAX_OPTION_WARNING);
     }
     const {$limit, ...filters} = params.query;
-    if ((filters[this.hashKey] && filters[this.hashKey].eq) || typeof filters[this.hashKey] === 'string') {
+    const hasHashKey = (filters[this.hashKey] && filters[this.hashKey].eq) || typeof filters[this.hashKey] === 'string';
+    const hasGlobalIndex = Object.keys(filters)
+      .filter(key => this.indexKeys.includes(key))
+      .filter(indexKey => filters[indexKey].eq || typeof filters[indexKey] === 'string')
+      .length > 0;
+    const shouldUseQuery = hasHashKey || hasGlobalIndex;
+    if (shouldUseQuery) {
       const queryOperation = this.model.query(filters);
       if ($limit) {
         queryOperation.limit($limit);
