@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import dynamooseModel from 'dynamoose';
 import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
+import findService from './find';
+import jsonify from './jsonify';
 
 export const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
@@ -12,7 +14,6 @@ export const DEFAULT_DYNAMOOSE_OPTIONS = {
   serverSideEncryption: false
 };
 export const {Schema} = dynamooseModel;
-const jsonify = model => JSON.parse(JSON.stringify(model));
 const getIndexKeys = schema => {
   if (schema && schema.indexes) {
     return Object.values(schema.indexes.global).map(index => index.name);
@@ -25,6 +26,9 @@ export class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModel, logger = defaultLogger) {
     this.options = options || {};
     this.logger = logger;
+    if (!this.options.paginate || !this.options.paginate.max) {
+      this.logger.warn(NO_MAX_OPTION_WARNING);
+    }
     this.paginate = this.options.paginate;
     if (this.options.localUrl) {
       dynamoose.local(this.options.localUrl);
@@ -42,51 +46,8 @@ export class Service {
   }
 
   async find(params = {query: {}}) {
-    const pagination = this.paginate;
-    if (!pagination || !pagination.max) {
-      this.logger.warn(NO_MAX_OPTION_WARNING);
-    }
-    const {$limit, ...filters} = params.query;
-    const hasHashKey = (filters[this.hashKey] && filters[this.hashKey].eq) || typeof filters[this.hashKey] === 'string';
-    const hasGlobalIndex = Object.keys(filters)
-      .filter(key => this.indexKeys.includes(key))
-      .filter(indexKey => filters[indexKey].eq || typeof filters[indexKey] === 'string')
-      .length > 0;
-    const shouldUseQuery = hasHashKey || hasGlobalIndex;
-    if (shouldUseQuery) {
-      const queryOperation = this.model.query(filters);
-      if ($limit) {
-        queryOperation.limit($limit);
-      } else if (pagination && pagination.max) {
-        queryOperation.limit(pagination.max);
-      } else {
-        queryOperation.all();
-      }
-
-      const result = await queryOperation.exec();
-      return {
-        scannedCount: result.scannedCount,
-        count: result.count,
-        timesScanned: result.timesScanned,
-        data: jsonify(result)
-      };
-    }
-    const scanOperation = this.model.scan(filters);
-    if ($limit) {
-      scanOperation.limit($limit);
-    } else if (pagination && pagination.max) {
-      scanOperation.limit(pagination.max);
-    } else {
-      scanOperation.all();
-    }
-
-    const result = await scanOperation.exec();
-    return {
-      scannedCount: result.scannedCount,
-      count: result.count,
-      timesScanned: result.timesScanned,
-      data: jsonify(result)
-    };
+    const {hashKey, indexKeys} = this;
+    return findService(this.model, {hashKey, indexKeys}, this.paginate).find(params.query);
   }
 
   async get(id, params) {
