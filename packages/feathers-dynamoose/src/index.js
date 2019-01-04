@@ -75,7 +75,8 @@ export class Service {
   }
 
   async patch(id, data, params) {
-    const result = await this.model.update(id, data);
+    const query = {[this.hashKey]: id, ...params.query};
+    const result = await this.model.update(query, data);
     return jsonify(result);
   }
 

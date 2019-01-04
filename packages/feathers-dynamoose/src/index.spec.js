@@ -80,27 +80,43 @@ describe('update', () => {
 });
 
 describe('patch', () => {
+  const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+
   it('should update the resource identified by the given id with the new data', async () => {
-    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
     const service = createService({modelName: randomModelName(), schema});
     const originalName = 'Original Name';
     const age = chance.natural({max: 10});
     const record = await service.create({id: chance.guid(), name: originalName, age, address: chance.address()});
     const newAddress = chance.address();
-    await service.patch({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    await service.patch(record.id, {$PUT: {address: newAddress}}, {query: {name: originalName}});
     const newRecord = await service.get(record.id);
     expect(newRecord.age).toBe(age);
     expect(newRecord.address).toBe(newAddress);
   });
 
   it('should return the updated record', async () => {
-    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
     const service = createService({modelName: randomModelName(), schema});
     const originalName = 'Original Name';
     const age = chance.natural({max: 10});
     const record = await service.create({id: chance.guid(), name: originalName, age, address: chance.address()});
     const newAddress = chance.address();
-    const updatedRecord = await service.patch({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    const updatedRecord = await service.patch(record.id, {$PUT: {address: newAddress}}, {query: {name: originalName}});
+    expect(updatedRecord.age).toBe(age);
+    expect(updatedRecord.address).toBe(newAddress);
+  });
+
+  it('should be able to accept just query params and not the ID', async () => {
+    const service = createService({modelName: randomModelName(), schema});
+    const originalName = 'Original Name';
+    const age = chance.natural({max: 10});
+    const record = await service.create({id: chance.guid(), name: originalName, age, address: chance.address()});
+    const newAddress = chance.address();
+    const updatedRecord = await service.patch(null, {$PUT: {address: newAddress}}, {
+      query: {
+        id: record.id,
+        name: originalName
+      }
+    });
     expect(updatedRecord.age).toBe(age);
     expect(updatedRecord.address).toBe(newAddress);
   });
