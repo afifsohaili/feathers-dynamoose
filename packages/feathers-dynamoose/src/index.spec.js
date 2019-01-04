@@ -51,29 +51,29 @@ describe('get', () => {
 });
 
 describe('update', () => {
+  const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
+
   it('should replace the resource identified by the given id with the new data', async () => {
-    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
     const service = createService({modelName: randomModelName(), schema});
     const originalName = 'Original Name';
     const record = await service.create({
       id: chance.guid(), name: originalName, age: chance.natural({max: 10}), address: chance.address()
     });
     const newAddress = chance.address();
-    await service.update({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    await service.update(record.id, {$PUT: {address: newAddress}}, {query: {name: originalName}});
     const newRecord = await service.get(record.id);
     expect(newRecord.age).toBe(undefined);
     expect(newRecord.address).toBe(newAddress);
   });
 
   it('should return the updated record', async () => {
-    const schema = {...defaultSchema, age: {type: Number}, address: {type: String}};
     const service = createService({modelName: randomModelName(), schema});
     const originalName = 'Original Name';
     const record = await service.create({
       id: chance.guid(), name: originalName, age: chance.natural({max: 10}), address: chance.address()
     });
     const newAddress = chance.address();
-    const updatedRecord = await service.update({id: record.id, name: originalName}, {$PUT: {address: newAddress}});
+    const updatedRecord = await service.update(record.id, {$PUT: {address: newAddress}}, {query: {name: originalName}});
     expect(updatedRecord.age).toBe(undefined);
     expect(updatedRecord.address).toBe(newAddress);
   });

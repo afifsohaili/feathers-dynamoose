@@ -68,9 +68,10 @@ export class Service {
   }
 
   async update(id, data, params) {
-    await this.model.delete(id);
-    await this.model.create(id);
-    const result = await this.model.update(id, data);
+    const query = {[this.hashKey]: id, ...params.query};
+    await this.model.delete(query);
+    await this.model.create(query);
+    const result = await this.model.update(query, data);
     return jsonify(result);
   }
 
