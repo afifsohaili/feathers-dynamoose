@@ -127,7 +127,7 @@ describe('remove', () => {
     const service = createService({modelName: randomModelName()});
     const name = chance.name();
     const newRecord = await service.create({id: chance.guid(), name});
-    await service.remove({id: newRecord.id, name});
+    await service.remove(newRecord.id, {query: {name}});
     const allRecords = await service.find();
     expect(allRecords.data.length).toBe(0);
   });
@@ -136,7 +136,7 @@ describe('remove', () => {
     const service = createService({modelName: randomModelName()});
     const name = chance.name();
     const newRecord = await service.create({id: chance.guid(), name});
-    const deletedRecord = await service.remove({id: newRecord.id, name});
+    const deletedRecord = await service.remove(newRecord.id, {query: {name}});
     expect(deletedRecord.name).toBe(name);
   });
 });

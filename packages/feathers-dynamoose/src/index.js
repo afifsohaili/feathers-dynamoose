@@ -82,7 +82,8 @@ export class Service {
   }
 
   async remove(id, params) {
-    const result = await this.model.delete(id);
+    const query = {[this.hashKey]: id, ...params.query};
+    const result = await this.model.delete(query);
     return jsonify(result);
   }
 }
