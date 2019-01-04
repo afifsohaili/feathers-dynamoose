@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-import dynamooseModel from 'dynamoose';
+import dynamooseModule from 'dynamoose';
 import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 import findService from './find';
 import jsonify from './jsonify';
 
-const getIndexKeys = schema => {
+const getIndexKeysFromSchema = schema => {
   if (schema && schema.indexes) {
     return Object.values(schema.indexes.global).map(index => index.name);
   }
@@ -12,6 +12,15 @@ const getIndexKeys = schema => {
   return Array.isArray(indexKeys) ? indexKeys : [];
 };
 
+const getHashKeyFromSchema = schema => schema instanceof dynamooseModule.Schema && schema.hashKey ?
+  schema.hashKey.name :
+  Object.keys(schema).filter(key => schema[key].hashKey)[0];
+
+const getRangeKeyFromSchema = schema => schema instanceof dynamooseModule.Schema ?
+  schema.rangeKey && schema.rangeKey.name :
+  Object.keys(schema).filter(key => schema[key].rangeKey)[0];
+
+export const {Schema} = dynamooseModule;
 export const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
   update: false,
@@ -22,10 +31,8 @@ export const DEFAULT_DYNAMOOSE_OPTIONS = {
   serverSideEncryption: false
 };
 
-export const {Schema} = dynamooseModel;
-
 export class Service {
-  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModel, logger = defaultLogger) {
+  constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModule, logger = defaultLogger) {
     this.options = options || {};
     this.logger = logger;
     if (!this.options.paginate || !this.options.paginate.max) {
@@ -36,13 +43,9 @@ export class Service {
       dynamoose.local(this.options.localUrl);
     }
     const {modelName, schema} = this.options;
-    this.hashKey = schema instanceof dynamoose.Schema && schema.hashKey ?
-      schema.hashKey.name :
-      Object.keys(schema).filter(key => schema[key].hashKey)[0];
-    this.rangeKey = schema instanceof dynamoose.Schema ?
-      schema.rangeKey && schema.rangeKey.name :
-      Object.keys(schema).filter(key => schema[key].rangeKey)[0];
-    this.indexKeys = getIndexKeys(schema);
+    this.hashKey = getHashKeyFromSchema(schema);
+    this.rangeKey = getRangeKeyFromSchema(schema);
+    this.indexKeys = getIndexKeysFromSchema(schema);
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
     this.id = this.hashKey;
   }
