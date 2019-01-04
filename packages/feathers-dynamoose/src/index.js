@@ -4,6 +4,14 @@ import defaultLogger, {NO_MAX_OPTION_WARNING} from './logger';
 import findService from './find';
 import jsonify from './jsonify';
 
+const getIndexKeys = schema => {
+  if (schema && schema.indexes) {
+    return Object.values(schema.indexes.global).map(index => index.name);
+  }
+  const indexKeys = Object.keys(schema).filter(key => schema[key].index && schema[key].index.global);
+  return Array.isArray(indexKeys) ? indexKeys : [];
+};
+
 export const DEFAULT_DYNAMOOSE_OPTIONS = {
   create: false,
   update: false,
@@ -13,14 +21,8 @@ export const DEFAULT_DYNAMOOSE_OPTIONS = {
   },
   serverSideEncryption: false
 };
+
 export const {Schema} = dynamooseModel;
-const getIndexKeys = schema => {
-  if (schema && schema.indexes) {
-    return Object.values(schema.indexes.global).map(index => index.name);
-  }
-  const indexKeys = Object.keys(schema).filter(key => schema[key].index && schema[key].index.global);
-  return Array.isArray(indexKeys) ? indexKeys : [];
-};
 
 export class Service {
   constructor(options, dynamooseOptions = DEFAULT_DYNAMOOSE_OPTIONS, dynamoose = dynamooseModel, logger = defaultLogger) {
