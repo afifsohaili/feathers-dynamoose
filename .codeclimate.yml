@@ -1,2 +1,7 @@
 exclude_patterns:
 - "**/*.spec.js"
+checks:
+  similar-code:
+    enabled: false
+  identical-code:
+    enabled: false
