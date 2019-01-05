@@ -55,8 +55,26 @@ export class Service {
     return findService(this.model, {hashKey, indexKeys}, this.paginate).find(params.query);
   }
 
-  async get(id, params) {
-    return this.model.queryOne({[this.hashKey]: {eq: id}}).exec();
+  async get(id, params = {}) {
+    const query = {[this.hashKey]: {eq: id}};
+    const attributes = Object.keys(params.query || {}).reduce((acc, key) => {
+      if (key === this.rangeKey) {
+        return {...acc, where: {...acc.where, [key]: params.query[key]}};
+      }
+      return {...acc, filters: {...acc.filters, [key]: params.query[key]}};
+    }, {where: {}, filters: {}});
+
+    const queryOperation = await this.model.query(query);
+    if (Object.keys(attributes.where).length) {
+      queryOperation.where(attributes.where);
+    }
+    if (Object.keys(attributes.filters).length) {
+      Object.keys(attributes.filters).forEach(key => {
+        queryOperation.filter(key).eq(attributes.filters[key]);
+      });
+    }
+    const [result] = await queryOperation.exec();
+    return result;
   }
 
   async create(data, params) {

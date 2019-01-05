@@ -30,9 +30,10 @@ describe('create', () => {
 });
 
 describe('get', () => {
+  const hashKey = chance.word();
+  const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}, age: {type: Number}};
+
   it('should get the record when there is a record with the given value as hash key', async () => {
-    const hashKey = chance.word();
-    const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
     const service = createService({modelName: randomModelName(), schema});
     const keyword = chance.word();
     const record = await service.create({[hashKey]: chance.guid(), name: keyword});
@@ -41,12 +42,38 @@ describe('get', () => {
   });
 
   it('should return undefined when there is no record with the given value as hash key', async () => {
-    const hashKey = chance.word();
-    const schema = {[hashKey]: {type: String, hashKey: true}, name: {type: String, rangeKey: true}};
     const service = createService({modelName: randomModelName(), schema});
     await service.create({[hashKey]: chance.guid(), name: chance.word()});
     const expected = await service.get('non-existent-id');
     expect(expected).toBe(undefined);
+  });
+
+  it('should be able to use params.query to filter by range key', async () => {
+    const service = createService({modelName: randomModelName(), schema});
+    const name1 = chance.name();
+    const name2 = chance.name();
+    const id = chance.guid();
+    await service.create([
+      {[hashKey]: id, name: name1},
+      {[hashKey]: id, name: name2}
+    ]);
+    const expectedName1 = await service.get(id, {query: {name: {eq: name1}}});
+    const expectedName2 = await service.get(id, {query: {name: {eq: name2}}});
+    expect(expectedName1.name).toBe(name1);
+    expect(expectedName2.name).toBe(name2);
+  });
+
+  it('should be able to use params.query to filter by other attributes', async () => {
+    const service = createService({modelName: randomModelName(), schema});
+    const name1 = chance.name();
+    const name2 = chance.name();
+    const id = chance.guid();
+    await service.create([
+      {[hashKey]: id, name: name1, age: 5},
+      {[hashKey]: id, name: name2, age: 6}
+    ]);
+    const expected = await service.get(id, {query: {age: 6}});
+    expect(expected.name).toEqual(name2);
   });
 });
 
