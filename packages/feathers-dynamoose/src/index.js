@@ -48,11 +48,12 @@ export class Service {
     this.indexKeys = getIndexKeysFromSchema(schema);
     this.model = dynamoose.model(modelName, schema, dynamooseOptions);
     this.id = this.hashKey;
+    this.jsonify = jsonify(schema);
   }
 
   async find(params = {query: {}}) {
     const {hashKey, indexKeys} = this;
-    return findService(this.model, {hashKey, indexKeys}, this.paginate).find(params.query);
+    return findService(this.options.schema)(this.model, {hashKey, indexKeys}, this.paginate).find(params.query);
   }
 
   async get(id, params = {}) {
@@ -74,7 +75,7 @@ export class Service {
       });
     }
     const [result] = await queryOperation.exec();
-    return result;
+    return this.jsonify(result);
   }
 
   async create(data, params) {
@@ -82,7 +83,7 @@ export class Service {
       return Promise.all(data.map(current => this.create(current, params)));
     }
     const record = await this.model.create(data);
-    return jsonify(record);
+    return this.jsonify(record);
   }
 
   async update(id, data, params) {
@@ -90,19 +91,19 @@ export class Service {
     await this.model.delete(query);
     await this.model.create(query);
     const result = await this.model.update(query, data);
-    return jsonify(result);
+    return this.jsonify(result);
   }
 
   async patch(id, data, params) {
     const query = {[this.hashKey]: id, ...params.query};
     const result = await this.model.update(query, data);
-    return jsonify(result);
+    return this.jsonify(result);
   }
 
   async remove(id, params) {
     const query = {[this.hashKey]: id, ...params.query};
     const result = await this.model.delete(query);
-    return jsonify(result);
+    return this.jsonify(result);
   }
 }
 

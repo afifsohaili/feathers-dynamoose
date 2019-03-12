@@ -19,13 +19,7 @@ const performQuery = async (model, filters, $limit, pagination) => {
     queryOperation.all();
   }
 
-  const result = await queryOperation.exec();
-  return {
-    scannedCount: result.scannedCount,
-    count: result.count,
-    timesScanned: result.timesScanned,
-    data: jsonify(result)
-  };
+  return queryOperation.exec();
 };
 
 const performScan = async (model, filters, $limit, pagination) => {
@@ -38,23 +32,22 @@ const performScan = async (model, filters, $limit, pagination) => {
     scanOperation.all();
   }
 
-  const result = await scanOperation.exec();
-  return {
-    scannedCount: result.scannedCount,
-    count: result.count,
-    timesScanned: result.timesScanned,
-    data: jsonify(result)
-  };
+  return scanOperation.exec();
 };
 
-const findService = (model, keys, pagination) => ({
-  find: async query => {
-    const {$limit, ...filters} = query || {};
-    if (shouldUseQuery(filters, keys)) {
-      return performQuery(model, filters, $limit, pagination);
+const findService = schema => (model, keys, pagination) => {
+  return {
+    find: async query => {
+      const {$limit, ...filters} = query || {};
+      const jsonifyResult = result => ({...result, data: jsonify(schema)(result)});
+      if (shouldUseQuery(filters, keys)) {
+        const result = await performQuery(model, filters, $limit, pagination);
+        return jsonifyResult(result);
+      }
+      const result = await performScan(model, filters, $limit, pagination);
+      return jsonifyResult(result);
     }
-    return performScan(model, filters, $limit, pagination);
-  }
-});
+  };
+};
 
 export default findService;

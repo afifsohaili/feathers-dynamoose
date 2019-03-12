@@ -75,6 +75,27 @@ describe('get', () => {
     const expected = await service.get(id, {query: {age: 6}});
     expect(expected.name).toEqual(name2);
   });
+
+  it('should return the object with keys based on the given schema', async () => {
+    const schemaFields = {
+      id: {type: String, hashKey: true},
+      name: {type: String, rangeKey: true},
+      address: {type: String}
+    };
+    const schema = new Schema(schemaFields, {
+      timestamps: true
+    });
+    const service = createService({modelName: randomModelName(), schema});
+    const id = chance.guid();
+    const data = {id, name: chance.name(), address: chance.address()};
+    await service.create(data);
+    const result = await service.get(id);
+    expect(result).toEqual(expect.objectContaining({
+      ...data,
+      createdAt: expect.anything(),
+      updatedAt: expect.anything()
+    }));
+  });
 });
 
 describe('update', () => {

@@ -64,7 +64,10 @@
     "collectCoverage": true,
     "coverageDirectory": "./coverage/",
     "coverageReporters": [
-      "lcov"
+      "json",
+      "lcov",
+      "text",
+      "clover"
     ],
     "globalSetup": "<rootDir>/tests/setup-dynamodb.js",
     "globalTeardown": "<rootDir>/tests/teardown-dynamodb.js",
