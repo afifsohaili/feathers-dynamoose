@@ -32,7 +32,7 @@ Options is a JavaScript object with the following keys:
 | Key       | Description                                                                        | Required |
 |-----------|------------------------------------------------------------------------------------|----------|
 | modelName | The name of the model.                                                             | ✅|
-| schema    | The schema for the model. Refer to https://dynamoosejs.com/api#schema              | ✅|
+| schema    | The schema for the model. Refer to https://dynamoosejs.com/api/schema/#options     | ✅|
 | localUrl  | If the key is present, will instantiate dynamoose with `dynamoose.local(localUrl)` | |
 
 ## Examples
