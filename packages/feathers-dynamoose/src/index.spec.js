@@ -189,7 +189,7 @@ describe('remove', () => {
   });
 });
 
-describe('passing dynamoose.Schema object for schema', async () => {
+describe('passing dynamoose.Schema object for schema', () => {
   it('should still obtain the hashkey', async () => {
     const hashKey = 'somecoolstring';
     const schema = new Schema({
@@ -206,7 +206,7 @@ describe('passing dynamoose.Schema object for schema', async () => {
   });
 });
 
-describe('set service.id for authentication', async () => {
+describe('set service.id for authentication', () => {
   it('should set the hashkey key as id', async () => {
     const hashKey = 'somecoolstring';
     const schema = new Schema({
@@ -223,7 +223,7 @@ describe('set service.id for authentication', async () => {
   });
 });
 
-describe('track keys for query', async () => {
+describe('track keys for query', () => {
   describe('given a Dynamoose.Schema object as schema', () => {
     it('should track the hashKey', async () => {
       const hashKey = 'somecoolstring';
