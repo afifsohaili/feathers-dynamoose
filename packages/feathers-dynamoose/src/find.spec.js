@@ -200,4 +200,19 @@ describe('find', () => {
     expect(scanSpy.called).toBe(true);
     expect(querySpy.called).toBe(false);
   });
+
+  it('should return just the attributes defined by $select query', async () => {
+    const additionalFields = {
+      gender: {type: String},
+      birthdate: {type: String}
+    };
+    const schema = {...defaultSchema, ...additionalFields};
+
+    const service = createService({modelName: randomModelName(), schema});
+    const data = {id: chance.guid(), name: chance.name(), gender: chance.gender(), birthdate: chance.date().toString()};
+    await service.create(data);
+    const result = await service.find({query: {$select: ['gender', 'id']}});
+    const {gender, id} = data;
+    expect(result.data[0]).toEqual({gender, id});
+  });
 });

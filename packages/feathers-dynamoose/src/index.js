@@ -59,6 +59,9 @@ export class Service {
   async get(id, params = {}) {
     const query = {[this.hashKey]: {eq: id}};
     const attributes = Object.keys(params.query || {}).reduce((acc, key) => {
+      if (key === '$select') {
+        return acc;
+      }
       if (key === this.rangeKey) {
         return {...acc, where: {...acc.where, [key]: params.query[key]}};
       }
@@ -66,6 +69,10 @@ export class Service {
     }, {where: {}, filters: {}});
 
     const queryOperation = await this.model.query(query);
+    const $select = (params.query && params.query.$select) || [];
+    if (params.query && $select && Array.isArray($select) && $select.length > 0) {
+      queryOperation.attributes($select);
+    }
     if (Object.keys(attributes.where).length) {
       queryOperation.where(attributes.where);
     }

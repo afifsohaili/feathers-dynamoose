@@ -96,6 +96,16 @@ describe('get', () => {
       updatedAt: expect.anything()
     }));
   });
+
+  it('should return only the attributes required when $select parameter is passed', async () => {
+    const service = createService({modelName: randomModelName(), schema});
+    const name = chance.name();
+    const id = chance.guid();
+    const age = chance.age();
+    await service.create([{[hashKey]: id, name, age}]);
+    const expectedName1 = await service.get(id, {query: {$select: ['age']}});
+    expect(expectedName1).toEqual({age});
+  });
 });
 
 describe('update', () => {

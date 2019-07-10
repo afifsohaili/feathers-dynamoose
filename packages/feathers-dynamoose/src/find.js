@@ -9,7 +9,7 @@ const shouldUseQuery = (filters, {hashKey, indexKeys}) => {
   return hasHashKey || hasGlobalIndex;
 };
 
-const performQuery = async (model, filters, $limit, pagination) => {
+const performQuery = async (model, filters, $limit, $select, pagination) => {
   const queryOperation = model.query(filters);
   if ($limit) {
     queryOperation.limit($limit);
@@ -18,11 +18,14 @@ const performQuery = async (model, filters, $limit, pagination) => {
   } else {
     queryOperation.all();
   }
+  if (Array.isArray($select) && $select.length > 0) {
+    queryOperation.attributes($select);
+  }
 
   return queryOperation.exec();
 };
 
-const performScan = async (model, filters, $limit, pagination) => {
+const performScan = async (model, filters, $limit, $select, pagination) => {
   const scanOperation = model.scan(filters);
   if ($limit) {
     scanOperation.limit($limit);
@@ -31,6 +34,9 @@ const performScan = async (model, filters, $limit, pagination) => {
   } else {
     scanOperation.all();
   }
+  if (Array.isArray($select) && $select.length > 0) {
+    scanOperation.attributes($select);
+  }
 
   return scanOperation.exec();
 };
@@ -38,13 +44,13 @@ const performScan = async (model, filters, $limit, pagination) => {
 const findService = schema => (model, keys, pagination) => {
   return {
     find: async query => {
-      const {$limit, ...filters} = query || {};
+      const {$limit, $select, ...filters} = query || {};
       const jsonifyResult = result => ({...result, data: jsonify(schema)(result)});
       if (shouldUseQuery(filters, keys)) {
-        const result = await performQuery(model, filters, $limit, pagination);
+        const result = await performQuery(model, filters, $limit, $select, pagination);
         return jsonifyResult(result);
       }
-      const result = await performScan(model, filters, $limit, pagination);
+      const result = await performScan(model, filters, $limit, $select, pagination);
       return jsonifyResult(result);
     }
   };
