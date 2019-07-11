@@ -30,7 +30,8 @@
     "dev": "backpack",
     "lint": "xo",
     "prepublish": "npm run build",
-    "test": "jest && codecov && stryker run && rimraf .stryker-tmp"
+    "test": "jest && codecov",
+    "test:mutation": "jest && codecov && stryker run && rimraf .stryker-tmp"
   },
   "directories": {
     "src": "src"
