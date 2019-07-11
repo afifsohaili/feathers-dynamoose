@@ -12,3 +12,4 @@ backpack.config.js
 stryker.conf.js
 src/
 tests/
+dynamodblocal-bin/
