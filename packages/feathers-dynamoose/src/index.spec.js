@@ -2,8 +2,8 @@
 
 import chance from '../tests/chance';
 // eslint-disable-next-line import/named
-import {Service, Schema} from '.';
 import {createService, defaultSchema, randomModelName} from '../tests/model-utils';
+import {Service, Schema} from '.';
 
 describe('create', () => {
   it('should save a record on dynamodb table', async () => {

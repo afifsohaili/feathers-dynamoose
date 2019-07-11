@@ -1,5 +1,5 @@
-import chance from './chance';
 import {Service} from '../src';
+import chance from './chance';
 
 const localUrl = 'http://localhost:8000';
 

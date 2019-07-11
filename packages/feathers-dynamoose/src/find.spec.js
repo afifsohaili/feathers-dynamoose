@@ -2,7 +2,7 @@
 import {spy} from 'sinon';
 import chance from '../tests/chance';
 import {createService, defaultSchema, randomModelName} from '../tests/model-utils';
-import {Schema, Service} from './index';
+import {Schema, Service} from '.';
 
 const passArgsToSpy = spy => args => {
   spy(args);

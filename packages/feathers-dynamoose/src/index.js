@@ -73,10 +73,10 @@ export class Service {
     if (params.query && $select && Array.isArray($select) && $select.length > 0) {
       queryOperation.attributes($select);
     }
-    if (Object.keys(attributes.where).length) {
+    if (Object.keys(attributes.where).length > 0) {
       queryOperation.where(attributes.where);
     }
-    if (Object.keys(attributes.filters).length) {
+    if (Object.keys(attributes.filters).length > 0) {
       Object.keys(attributes.filters).forEach(key => {
         queryOperation.filter(key).eq(attributes.filters[key]);
       });
