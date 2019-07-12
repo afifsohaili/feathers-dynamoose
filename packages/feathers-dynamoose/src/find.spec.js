@@ -79,6 +79,7 @@ describe('find', () => {
     const data = new Array(recordsLength).fill('').map(() => ({id: chance.guid(), name: keyword + chance.word()}));
     await service.create(data);
     const result = await service.find({query: {name: {contains: keyword}}});
+    expect(Object.keys(result).length).toBe(4);
     expect(result.data.length).toBe(recordsLength);
     expect(result.scannedCount).toBe(recordsLength);
     expect(result.count).toBe(recordsLength);
