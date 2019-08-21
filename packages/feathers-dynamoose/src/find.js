@@ -61,14 +61,4 @@ const findService = schema => (model, keys, pagination) => {
   };
 };
 
-class FindService {
-  constructor(schema) {
-    this.schema = schema;
-  }
-
-  find(model, keys, pagination) {
-
-  }
-}
-
 export default findService;
