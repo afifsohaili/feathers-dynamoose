@@ -50,10 +50,21 @@ const feathersDynamoose = require('feathers-dynamoose');
 const postsSchema = require('users/schema');
 
 app.use('/v1/posts', feathersDynamoose({modelName: 'posts', schema: postsSchema}));
-// create a new record
-const record = await app.service('v1/posts').create({postId: uuid(), blogId: uuid()});
-// delete a record. id accepts an object.
-await app.service('v1/posts').delete({postId: record.postId, blogId: record.blogId});
+// POST a new record
+await app.service('v1/posts').create({postId: uuid(), blogId: uuid()});
+// PUT a record
+await service.update(postId, {$PUT: {body: newBody}}, {query: {blogId}});
+// PATCH a record - REMEMBER, PUT replaces the resource, PATCH updates the attributes
+await service.patch(postId, {$PUT: {body: newBody}}, {query: {blogId}});
+// DELETE a record. id accepts an object.
+await app.service('v1/posts').delete({postId: postId, blogId: blogId});
+```
+
+Use with http libraries against feathers backend. e.g. with `axios`.
+```js
+await axios.patch(`https://your.backend.url/v1/posts/${postId}`, {
+  $PUT: {comments: []}
+}, {params: {blogId: blogId}});
 ```
 
 ## License
