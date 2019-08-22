@@ -9,36 +9,37 @@ const shouldUseQuery = (filters, {hashKey, indexKeys}) => {
   return hasHashKey || hasGlobalIndex;
 };
 
-const performQuery = async (model, filters, $limit, $select, pagination) => {
-  const queryOperation = model.query(filters);
-  if ($limit) {
-    queryOperation.limit($limit);
-  } else if (pagination && pagination.max) {
-    queryOperation.limit(pagination.max);
-  } else {
-    queryOperation.all();
-  }
-  if (Array.isArray($select) && $select.length > 0) {
-    queryOperation.attributes($select);
-  }
-
-  return queryOperation.exec();
+const applyFilters = (operation, filters, keys) => {
+  const allKeys = Object.values(keys).reduce((acc, key) => {
+    if (Array.isArray(key)) {
+      return [...acc, ...key];
+    }
+    return [...acc, key];
+  }, []);
+  Object.entries(filters).forEach(([filterKey, value]) => {
+    if (allKeys.includes(filterKey)) {
+      return;
+    }
+    operation.filter(filterKey).eq(value);
+  });
+  return operation;
 };
 
-const performScan = async (model, filters, $limit, $select, pagination) => {
-  const scanOperation = model.scan(filters);
-  if ($limit) {
-    scanOperation.limit($limit);
-  } else if (pagination && pagination.max) {
-    scanOperation.limit(pagination.max);
-  } else {
-    scanOperation.all();
-  }
+const applySelectAttributes = (operation, $select) => {
   if (Array.isArray($select) && $select.length > 0) {
-    scanOperation.attributes($select);
+    operation.attributes($select);
   }
+  return operation;
+};
 
-  return scanOperation.exec();
+const applyLimits = (operation, $limit, pagination) => {
+  if ($limit) {
+    operation.limit($limit);
+  } else if (pagination && pagination.max) {
+    operation.limit(pagination.max);
+  } else {
+    operation.all();
+  }
 };
 
 const jsonifyResult = schema => result => {
@@ -47,15 +48,21 @@ const jsonifyResult = schema => result => {
 };
 
 const findService = schema => (model, keys, pagination) => {
+  const jsonifyResultBasedOnSchema = jsonifyResult(schema);
+
   return {
     find: async query => {
-      const {$limit, $select, ...filters} = query || {};
-      const jsonifyResultBasedOnSchema = jsonifyResult(schema);
-      if (shouldUseQuery(filters, keys)) {
-        const result = await performQuery(model, filters, $limit, $select, pagination);
-        return jsonifyResultBasedOnSchema(result);
+      const {$limit, $select, ...queries} = query || {};
+      let operation;
+      if (shouldUseQuery(queries, keys)) {
+        operation = model.query(queries);
+      } else {
+        operation = model.scan(queries);
       }
-      const result = await performScan(model, filters, $limit, $select, pagination);
+      applyFilters(operation, queries, keys);
+      applySelectAttributes(operation, $select);
+      applyLimits(operation, $limit, pagination);
+      const result = await operation.exec();
       return jsonifyResultBasedOnSchema(result);
     }
   };

@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/afifsohaili/feathers-dynamoose#readme",
   "devDependencies": {
+    "@types/jest": "^24.0.18",
     "eslint": "^5.16.0",
     "lerna": "^3.16.4"
   }

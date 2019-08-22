@@ -8,7 +8,7 @@ DynamoDbLocal.configureInstaller({
 });
 
 module.exports = async () => {
-  const dynamoLocalPortNumber = 8000;
+  const dynamoLocalPortNumber = 15551;
   global.__dynamodb__ = await DynamoDbLocal.launch(dynamoLocalPortNumber, null, [], false);
   console.log('Launched DynamoDB');
 };

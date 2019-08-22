@@ -52,8 +52,8 @@ export class Service {
   }
 
   async find(params = {query: {}}) {
-    const {hashKey, indexKeys} = this;
-    return findService(this.options.schema)(this.model, {hashKey, indexKeys}, this.paginate).find(params.query);
+    const {hashKey, rangeKey, indexKeys} = this;
+    return findService(this.options.schema)(this.model, {hashKey, rangeKey, indexKeys}, this.paginate).find(params.query);
   }
 
   async get(id, params = {}) {
