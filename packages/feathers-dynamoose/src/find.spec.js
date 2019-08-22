@@ -1,12 +1,12 @@
 /* globals describe, it, expect */
-import { spy } from 'sinon';
+import {spy} from 'sinon';
 import chance from '../tests/chance';
 import {
   createService,
   defaultSchema,
   randomModelName
 } from '../tests/model-utils';
-import { Schema, Service } from '.';
+import {Schema, Service} from '.';
 
 const passArgsToSpy = spy => args => {
   spy(args);
@@ -16,7 +16,8 @@ const passArgsToSpy = spy => args => {
 const modelStub = spy => ({
   limit: passArgsToSpy(spy),
   all: passArgsToSpy(spy),
-  filter: function(args) {
+  // eslint-disable-next-line object-shorthand
+  filter: function (args) {
     passArgsToSpy(spy)(args);
     return this;
   },
