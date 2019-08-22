@@ -1,7 +1,7 @@
 {
   "name": "feathers-dynamoose",
   "description": "Feathers service with AWS DynamoDb via dynamoose",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "homepage": "https://github.com/afifsohaili/feathers-dynamoose",
   "main": "build/main.js",
   "keywords": [
