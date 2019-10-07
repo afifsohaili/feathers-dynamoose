@@ -58,6 +58,8 @@ await service.update(postId, {$PUT: {body: newBody}}, {query: {blogId}});
 await service.patch(postId, {$PUT: {body: newBody}}, {query: {blogId}});
 // DELETE a record. id accepts an object.
 await app.service('v1/posts').delete({postId: postId, blogId: blogId});
+// Query all records based on the given query
+await app.service('v1/posts').find({postId: postId, all: 'true'});
 ```
 
 Use with http libraries against feathers backend. e.g. with `axios`.

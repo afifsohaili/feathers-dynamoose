@@ -299,4 +299,25 @@ describe('find', () => {
     const {gender, id} = data;
     expect(result.data[0]).toEqual({gender, id});
   });
+
+  it('should return all rows when query.all is true despite paginate.max option', async () => {
+    const service = createService({
+      modelName: randomModelName(),
+      schema: defaultSchema,
+      paginate: {max: 1}
+    });
+    const variableLengthArray = new Array(chance.integer({
+      min: 5,
+      max: 15
+    })).fill('');
+    for (const _ of variableLengthArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await service.create({
+        id: chance.guid(),
+        name: chance.name()
+      });
+    }
+    const result = await service.find({query: {all: 'true'}});
+    expect(result.data.length).toEqual(variableLengthArray.length);
+  });
 });

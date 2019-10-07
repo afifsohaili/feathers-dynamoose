@@ -52,7 +52,7 @@ const findService = schema => (model, keys, pagination) => {
 
   return {
     find: async query => {
-      const {$limit, $select, ...queries} = query || {};
+      const {$limit, $select, all, ...queries} = query || {};
       let operation;
       if (shouldUseQuery(queries, keys)) {
         operation = model.query(queries);
@@ -61,7 +61,11 @@ const findService = schema => (model, keys, pagination) => {
       }
       applyFilters(operation, queries, keys);
       applySelectAttributes(operation, $select);
-      applyLimits(operation, $limit, pagination);
+      if (all === 'true') {
+        operation.all();
+      } else {
+        applyLimits(operation, $limit, pagination);
+      }
       const result = await operation.exec();
       return jsonifyResultBasedOnSchema(result);
     }
