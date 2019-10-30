@@ -310,6 +310,7 @@ describe('find', () => {
       min: 5,
       max: 15
     })).fill('');
+    // eslint-disable-next-line no-unused-vars
     for (const _ of variableLengthArray) {
       // eslint-disable-next-line no-await-in-loop
       await service.create({
