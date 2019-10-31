@@ -53,6 +53,9 @@ const applyRangeKeyQuery = (operation, queries, keys) => {
   if (!rangeKeyQuery) {
     return;
   }
+  if ((keys.indexKeys || []).includes(keys.rangeKey)) {
+    return;
+  }
   if (typeof rangeKeyQuery === 'object') {
     Object.entries(rangeKeyQuery).forEach(([queryKey, queryValue]) => {
       if (queryKey === 'eq') {

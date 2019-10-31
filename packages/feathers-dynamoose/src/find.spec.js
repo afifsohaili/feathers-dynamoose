@@ -233,7 +233,7 @@ describe('find', () => {
     expect(querySpy.called).toBe(false);
   });
 
-  it('should filter based on hashkey and rangekey', async () => {
+  it('should query based on hashkey and rangekey', async () => {
     const schema = {
       school: {type: String, hashKey: true},
       occupation: {type: String, rangeKey: true},
@@ -267,7 +267,51 @@ describe('find', () => {
     expect(allTeachersFromSchoolA.count).toBe(2);
   });
 
-  it('should filter based on all given hashkey, rangekey and other GSI attributes', async () => {
+  it('should query based on rangekey that is also a hashkey in a GSI', async () => {
+    const schema = {
+      id: {type: String, hashKey: true},
+      school: {
+        type: String,
+        rangeKey: true,
+        index: {
+          global: true,
+          rangeKey: 'occupation',
+          name: 'SchoolIndex',
+          project: true,
+          throughput: 1
+        }
+      },
+      occupation: {
+        type: String
+      },
+      name: {type: String}
+    };
+    const teacherMath = 'teacher-math';
+    const clerk = 'clerk';
+    const headmaster = 'headmaster';
+    const schoolA = 'School A';
+    const schoolB = 'School B';
+
+    const service = createService({modelName: randomModelName(), schema});
+
+    const createData = async (school, occupation) => service.create({
+      id: chance.guid(),
+      school,
+      occupation,
+      name: chance.name()
+    });
+    const {id: idToSearch} = await createData(schoolA, headmaster);
+    await createData(schoolA, teacherMath);
+    await createData(schoolB, clerk);
+
+    const staffOfSpecificId = await service.find({query: {id: idToSearch}});
+    expect(staffOfSpecificId.count).toBe(1);
+
+    const allStaffFromSchoolA = await service.find({query: {school: schoolA}});
+    expect(allStaffFromSchoolA.count).toBe(2);
+  });
+
+  it('should query based on all given hashkey, rangekey and other GSI attributes', async () => {
     const schema = {
       id: {type: String, hashKey: true},
       school: {type: String, rangeKey: true},
