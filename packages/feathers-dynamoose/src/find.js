@@ -1,4 +1,5 @@
 import jsonify from './jsonify';
+import logger from './logger';
 
 const shouldUseQuery = (filters, {hashKey, indexKeys}) => {
   const hasGlobalIndex = Object.keys(filters)
@@ -47,6 +48,26 @@ const jsonifyResult = schema => result => {
   return {scannedCount, count, timesScanned, data: jsonify(schema)(result)};
 };
 
+const applyRangeKeyQuery = (operation, queries, keys) => {
+  const rangeKeyQuery = queries[keys.rangeKey];
+  if (!rangeKeyQuery) {
+    return;
+  }
+  if (typeof rangeKeyQuery === 'object') {
+    Object.entries(rangeKeyQuery).forEach(([queryKey, queryValue]) => {
+      if (queryKey === 'eq') {
+        operation.where(keys.rangeKey).eq(queryValue);
+      } else if (queryKey === 'beginsWith') {
+        operation.where(keys.rangeKey).beginsWith(queryValue);
+      } else {
+        logger.warn(`${queryKey} query for sort key is not supported`);
+      }
+    });
+  } else if (typeof rangeKeyQuery === 'string') {
+    operation.where(keys.rangeKey).eq(rangeKeyQuery);
+  }
+};
+
 const findService = schema => (model, keys, pagination) => {
   const jsonifyResultBasedOnSchema = jsonifyResult(schema);
 
@@ -56,6 +77,7 @@ const findService = schema => (model, keys, pagination) => {
       let operation;
       if (shouldUseQuery(queries, keys)) {
         operation = model.query(queries);
+        applyRangeKeyQuery(operation, queries, keys);
       } else {
         operation = model.scan(queries);
       }

@@ -21,6 +21,9 @@ const modelStub = spy => ({
     passArgsToSpy(spy)(args);
     return this;
   },
+  where: function () {
+    return this;
+  },
   eq: passArgsToSpy(spy),
   exec: () => ({scannedCount: 0, count: 0, timesScanned: 0, data: []})
 });
@@ -149,7 +152,8 @@ describe('find', () => {
       local: spy(),
       model: () => ({
         scan: () => modelStub(scanSpy),
-        query: () => modelStub(querySpy)
+        query: () => modelStub(querySpy),
+        where: () => modelStub(spy())
       }),
       Schema
     };
@@ -227,6 +231,40 @@ describe('find', () => {
     await service.find({query: {birthdate: {eq: chance.string()}}});
     expect(scanSpy.called).toBe(true);
     expect(querySpy.called).toBe(false);
+  });
+
+  it('should filter based on hashkey and rangekey', async () => {
+    const schema = {
+      school: {type: String, hashKey: true},
+      occupation: {type: String, rangeKey: true},
+      name: {type: String}
+    };
+    const teacherMath = 'teacher-math';
+    const teacherEnglish = 'teacher-english';
+    const clerk = 'clerk';
+    const headmaster = 'headmaster';
+    const schoolA = 'School A';
+
+    const service = createService({modelName: randomModelName(), schema});
+
+    const createData = async (school, occupation) => service.create({
+      school,
+      occupation,
+      name: chance.name()
+    });
+    await createData(schoolA, headmaster);
+    await createData(schoolA, teacherMath);
+    await createData(schoolA, clerk);
+    await createData(schoolA, teacherEnglish);
+
+    const allStaffFromSchoolA = await service.find({query: {school: schoolA}});
+    expect(allStaffFromSchoolA.count).toBe(4);
+
+    const mathTeacherFromSchoolA = await service.find({query: {school: schoolA, occupation: teacherMath}});
+    expect(mathTeacherFromSchoolA.count).toBe(1);
+
+    const allTeachersFromSchoolA = await service.find({query: {school: schoolA, occupation: {beginsWith: 'teacher'}}});
+    expect(allTeachersFromSchoolA.count).toBe(2);
   });
 
   it('should filter based on all given hashkey, rangekey and other GSI attributes', async () => {
