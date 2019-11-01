@@ -21,9 +21,7 @@ const modelStub = spy => ({
     passArgsToSpy(spy)(args);
     return this;
   },
-  where: function () {
-    return this;
-  },
+  where: () => this,
   eq: passArgsToSpy(spy),
   exec: () => ({scannedCount: 0, count: 0, timesScanned: 0, data: []})
 });
