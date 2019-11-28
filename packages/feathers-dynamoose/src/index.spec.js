@@ -63,6 +63,22 @@ describe('get', () => {
     expect(expectedName2.name).toBe(name2);
   });
 
+  it('should be able to use params.query to filter by range key without using eq key', async () => {
+    const service = createService({modelName: randomModelName(), schema});
+    const name1 = chance.name();
+    const name2 = chance.name();
+    const id = chance.guid();
+    await service.create([
+      {[hashKey]: id, name: name1},
+      {[hashKey]: id, name: name2}
+    ]);
+
+    const expectedName1 = await service.get(id, {query: {name: name1}});
+    const expectedName2 = await service.get(id, {query: {name: name2}});
+    expect(expectedName1.name).toBe(name1);
+    expect(expectedName2.name).toBe(name2);
+  });
+
   it('should be able to use params.query to filter by other attributes', async () => {
     const service = createService({modelName: randomModelName(), schema});
     const name1 = chance.name();

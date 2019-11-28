@@ -62,7 +62,10 @@ export class Service {
       if (key === '$select') {
         return acc;
       }
-      if (key === this.rangeKey) {
+      if (key === this.rangeKey && typeof params.query[key] === 'string') {
+        return {...acc, where: {...acc.where, [key]: {eq: params.query[key]}}};
+      }
+      if (key === this.rangeKey && typeof params.query[key] === 'object') {
         return {...acc, where: {...acc.where, [key]: params.query[key]}};
       }
       return {...acc, filters: {...acc.filters, [key]: params.query[key]}};
